@@ -1,8 +1,15 @@
 const Discord = require("discord.js");
 
 const client = new Discord.Client({
-  ws: { intents: ["GUILDS", "GUILD_MESSAGES"] }
+  ws: {
+    intents: [
+      "GUILDS",
+      "GUILD_MESSAGES"
+    ]
+  },
+  partials: ["MESSAGE", "CHANNEL", "REACTION"]
 });
+
 
 const PREFIX = "!mc";
 
