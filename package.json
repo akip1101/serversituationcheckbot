@@ -1,5 +1,5 @@
 {
-  "name": "discordjs-v12-bot",
+  "name": "discord-bot",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -7,5 +7,8 @@
   },
   "dependencies": {
     "discord.js": "^12.5.3"
+  },
+  "engines": {
+    "node": "16.x"
   }
 }
