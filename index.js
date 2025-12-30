@@ -33,7 +33,6 @@ client.on("message", message => {
       .setDescription("サーバーが起動しました！")
       .addField("🌐 サーバーIP", `\`\`\`${ip}\`\`\``)
       .addField("👤 起動者", message.author.tag, true)
-      .setThumbnail(message.guild.iconURL({ dynamic: true }))
       .setFooter("Minecraft Server Bot")
       .setTimestamp();
 
@@ -47,7 +46,6 @@ client.on("message", message => {
       .setColor("#e74c3c")
       .setDescription("サーバーが停止しました。")
       .addField("👤 停止者", message.author.tag, true)
-      .setThumbnail(message.guild.iconURL({ dynamic: true }))
       .setFooter("Minecraft Server Bot")
       .setTimestamp();
 
