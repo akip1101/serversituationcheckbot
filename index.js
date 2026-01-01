@@ -11,6 +11,7 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds]
 });
 
+
 // ===== スラッシュコマンド登録 =====
 const commands = [
   new SlashCommandBuilder()
