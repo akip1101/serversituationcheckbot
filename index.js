@@ -1,66 +1,87 @@
-const Discord = require("discord.js");
+const {
+  Client,
+  GatewayIntentBits,
+  SlashCommandBuilder,
+  Routes,
+  REST,
+  EmbedBuilder
+} = require("discord.js");
 
-const client = new Discord.Client({
-  ws: {
-    intents: [
-      "GUILDS",
-      "GUILD_MESSAGES"
-    ]
-  },
-  partials: ["MESSAGE", "CHANNEL", "REACTION"]
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds]
 });
 
+// ===== スラッシュコマンド登録 =====
+const commands = [
+  new SlashCommandBuilder()
+    .setName("mcstart")
+    .setDescription("Minecraftサーバーを起動したことを通知")
+    .addStringOption(option =>
+      option
+        .setName("ip")
+        .setDescription("サーバーIP")
+        .setRequired(true)
+    ),
+  new SlashCommandBuilder()
+    .setName("mcstop")
+    .setDescription("Minecraftサーバーを停止したことを通知")
+].map(cmd => cmd.toJSON());
 
-const PREFIX = "!mc";
+const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 
+(async () => {
+  try {
+    await rest.put(
+      Routes.applicationCommands(process.env.CLIENT_ID),
+      { body: commands }
+    );
+    console.log("スラッシュコマンド登録完了");
+  } catch (error) {
+    console.error(error);
+  }
+})();
+
+// ===== Bot起動 =====
 client.once("ready", () => {
   console.log(`ログイン成功: ${client.user.tag}`);
 });
 
-client.on("message", message => {
-  if (message.author.bot) return;
-  if (!message.guild) return;
-  if (!message.content.startsWith(PREFIX)) return;
+// ===== コマンド処理 =====
+client.on("interactionCreate", async interaction => {
+  if (!interaction.isChatInputCommand()) return;
 
-  const args = message.content.split(" ");
-  const command = args[1];
+  // 起動
+  if (interaction.commandName === "mcstart") {
+    const ip = interaction.options.getString("ip");
 
-  // ===== 起動 =====
-  if (command === "start") {
-    const ip = args[2];
-    if (!ip) {
-      return message.channel.send(
-        "❌ IPアドレスを指定してください\n例: `!mc start play.example.com`"
-      );
-    }
-
-    const embed = new Discord.MessageEmbed()
+    const embed = new EmbedBuilder()
       .setTitle("🟢 Minecraft サーバー起動")
-      .setColor("#2ecc71")
-      .setDescription("サーバーが起動しました！")
-      .addField("🌐 サーバーIP", `\`\`\`${ip}\`\`\``)
-      .addField("👤 起動者", message.author.tag, true)
-      .setFooter("Minecraft Server Bot")
+      .setColor(0x2ecc71)
+      .addFields(
+        { name: "🌐 サーバーIP", value: `\`\`\`${ip}\`\`\`` },
+        { name: "👤 起動者", value: interaction.user.tag }
+      )
       .setTimestamp();
 
-    message.channel.send(embed);
+    await interaction.reply({ embeds: [embed] });
   }
 
-  // ===== 停止 =====
-  if (command === "stop") {
-    const embed = new Discord.MessageEmbed()
+  // 停止
+  if (interaction.commandName === "mcstop") {
+    const embed = new EmbedBuilder()
       .setTitle("🔴 Minecraft サーバー停止")
-      .setColor("#e74c3c")
-      .setDescription("サーバーが停止しました。")
-      .addField("👤 停止者", message.author.tag, true)
-      .setFooter("Minecraft Server Bot")
+      .setColor(0xe74c3c)
+      .addFields({
+        name: "👤 停止者",
+        value: interaction.user.tag
+      })
       .setTimestamp();
 
-    message.channel.send(embed);
+    await interaction.reply({ embeds: [embed] });
   }
 });
 
-// 落下防止（必須）
+// 落下防止
 process.on("unhandledRejection", console.error);
 process.on("uncaughtException", console.error);
 
